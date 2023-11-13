@@ -1,8 +1,22 @@
+/* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 const { nanoid } = require('nanoid');
 const books = require('./books');
+const { validateBook } = require('./validation');
 
 const addBookHandler = (req, h) => {
+  const { error } = validateBook(req.payload);
+
+  if (error) {
+    console.log(error);
+    const response = h.response({
+      status: 'fail',
+      message: error.message,
+    });
+    response.code(422);
+    return response;
+  }
+
   const {
     name,
     year,
@@ -33,24 +47,6 @@ const addBookHandler = (req, h) => {
     insertedAt,
     updatedAt,
   };
-
-  if (name === undefined) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal menambahkan buku. Mohon isi nama buku',
-    });
-    response.code(400);
-    return response;
-  }
-
-  if (readPage > pageCount) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
-    });
-    response.code(400);
-    return response;
-  }
 
   books.push(book);
   const isSuccess = books.filter((b) => b.id === id).length > 0;
