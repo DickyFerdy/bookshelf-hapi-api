@@ -8,7 +8,6 @@ const addBookHandler = (req, h) => {
   const { error } = validateBook(req.payload);
 
   if (error) {
-    console.log(error);
     const response = h.response({
       status: 'fail',
       message: error.message,
@@ -212,7 +211,6 @@ const editBookByIdHandler = (req, h) => {
   const { error } = validateBook(req.payload);
 
   if (error) {
-    console.log(error);
     const response = h.response({
       status: 'fail',
       message: error.message,
