@@ -11,7 +11,7 @@ const bookSchema = Joi.object().keys({
   publisher: Joi.string().required(),
   pageCount: Joi.number().integer().required(),
   readPage: Joi.number().integer().max(Joi.ref('pageCount')).required(),
-  reading: Joi.boolean().truthy('1').falsy('0'),
+  reading: Joi.boolean().required(),
 });
 
 exports.validateBook = validator(bookSchema);

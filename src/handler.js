@@ -209,6 +209,18 @@ const getBookByIdHandler = (req, h) => {
 const editBookByIdHandler = (req, h) => {
   const { id } = req.params;
 
+  const { error } = validateBook(req.payload);
+
+  if (error) {
+    console.log(error);
+    const response = h.response({
+      status: 'fail',
+      message: error.message,
+    });
+    response.code(422);
+    return response;
+  }
+
   const {
     name,
     year,
@@ -220,26 +232,8 @@ const editBookByIdHandler = (req, h) => {
     reading,
   } = req.payload;
 
+  const finished = pageCount === readPage;
   const updatedAt = new Date().toISOString();
-
-  if (name === undefined) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal memperbarui buku. Mohon isi nama buku',
-    });
-    response.code(400);
-    return response;
-  }
-
-  if (readPage > pageCount) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
-    });
-    response.code(400);
-    return response;
-  }
-
   const index = books.findIndex((book) => book.id === id);
 
   if (index !== -1) {
@@ -254,6 +248,7 @@ const editBookByIdHandler = (req, h) => {
       readPage,
       reading,
       updatedAt,
+      finished,
     };
     const response = h.response({
       status: 'success',
