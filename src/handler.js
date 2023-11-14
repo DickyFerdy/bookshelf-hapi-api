@@ -106,7 +106,12 @@ const getAllBooksHandler = async (_, h) => {
 const getBookByIdHandler = async (req, h) => {
   const { id } = req.params;
 
-  try {
+  const books = await booksId();
+  const book = books.map((b) => b.id);
+  const bookIdExist = book.some((bookId) => bookId === id);
+
+  if (bookIdExist) {
+    // eslint-disable-next-line no-shadow
     const book = await bookById(id);
     const response = h.response({
       status: 'success',
@@ -116,15 +121,14 @@ const getBookByIdHandler = async (req, h) => {
     });
     response.code(200);
     return response;
-  } catch (error) {
-    console.log(error);
-    const response = h.response({
-      status: 'fail',
-      message: 'Buku tidak ditemukan',
-    });
-    response.code(404);
-    return response;
   }
+
+  const response = h.response({
+    status: 'fail',
+    message: 'Buku tidak ditemukan',
+  });
+  response.code(404);
+  return response;
 };
 
 const editBookByIdHandler = (req, h) => {
