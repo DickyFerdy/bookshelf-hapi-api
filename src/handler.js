@@ -7,9 +7,10 @@ const {
   bookById,
   deleteBookById,
   booksId,
+  insertBook,
 } = require('./db/queries');
 
-const addBookHandler = (req, h) => {
+const addBookHandler = async (req, h) => {
   const { error } = validateBook(req.payload);
 
   if (error) {
@@ -37,7 +38,7 @@ const addBookHandler = (req, h) => {
   const insertedAt = new Date().toISOString();
   const updatedAt = insertedAt;
 
-  const book = {
+  const bookData = {
     id,
     name,
     year,
@@ -52,8 +53,8 @@ const addBookHandler = (req, h) => {
     updatedAt,
   };
 
-  books.push(book);
-  const isSuccess = books.filter((b) => b.id === id).length > 0;
+  const book = await insertBook(bookData);
+  const isSuccess = book.some((b) => b.id === id);
 
   if (isSuccess) {
     const response = h.response({
@@ -108,9 +109,9 @@ const getBookByIdHandler = async (req, h) => {
 
   const books = await booksId();
   const book = books.map((b) => b.id);
-  const bookIdExist = book.some((bookId) => bookId === id);
+  const isSuccess = book.some((bookId) => bookId === id);
 
-  if (bookIdExist) {
+  if (isSuccess) {
     // eslint-disable-next-line no-shadow
     const book = await bookById(id);
     const response = h.response({
@@ -195,9 +196,9 @@ const deleteBookByIdHandler = async (req, h) => {
 
   const books = await booksId();
   const book = books.map((b) => b.id);
-  const bookIdExist = book.some((bookId) => bookId === id);
+  const isSuccess = book.some((bookId) => bookId === id);
 
-  if (bookIdExist) {
+  if (isSuccess) {
     await deleteBookById(id);
     const response = h.response({
       status: 'success',
