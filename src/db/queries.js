@@ -67,6 +67,44 @@ const booksId = () => new Promise((resolve, reject) => {
   });
 });
 
+const updateBook = (book) => new Promise((resolve, reject) => {
+  const {
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    finished,
+    reading,
+    updatedAt,
+    id,
+  } = book;
+  client.query(
+    'UPDATE book SET name = $1, year = $2, author = $3, summary = $4, publisher = $5, page_count = $6, read_page = $7, finished = $8, reading = $9, updated_at = $10 WHERE id = $11',
+    [
+      name,
+      year,
+      author,
+      summary,
+      publisher,
+      pageCount,
+      readPage,
+      finished,
+      reading,
+      updatedAt,
+      id,
+    ],
+    (error, result) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(result);
+    },
+  );
+});
+
 const deleteBookById = (id) => new Promise((resolve, reject) => {
   client.query('DELETE FROM book WHERE id = $1', [id], (error, result) => {
     if (error) {
@@ -82,4 +120,5 @@ module.exports = {
   deleteBookById,
   booksId,
   insertBook,
+  updateBook,
 };

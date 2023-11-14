@@ -8,6 +8,7 @@ const {
   deleteBookById,
   booksId,
   insertBook,
+  updateBook,
 } = require('./db/queries');
 
 const addBookHandler = async (req, h) => {
@@ -132,9 +133,8 @@ const getBookByIdHandler = async (req, h) => {
   return response;
 };
 
-const editBookByIdHandler = (req, h) => {
+const editBookByIdHandler = async (req, h) => {
   const { id } = req.params;
-
   const { error } = validateBook(req.payload);
 
   if (error) {
@@ -159,22 +159,25 @@ const editBookByIdHandler = (req, h) => {
 
   const finished = pageCount === readPage;
   const updatedAt = new Date().toISOString();
-  const index = books.findIndex((book) => book.id === id);
 
-  if (index !== -1) {
-    books[index] = {
-      ...books[index],
-      name,
-      year,
-      author,
-      summary,
-      publisher,
-      pageCount,
-      readPage,
-      reading,
-      updatedAt,
-      finished,
-    };
+  const bookData = {
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    finished,
+    reading,
+    updatedAt,
+    id,
+  };
+
+  const book = await updateBook(bookData);
+  const isSuccess = book.rowCount === 1;
+
+  if (isSuccess) {
     const response = h.response({
       status: 'success',
       message: 'Buku berhasil diperbarui',
