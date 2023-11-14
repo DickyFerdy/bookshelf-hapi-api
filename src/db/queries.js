@@ -18,4 +18,27 @@ const bookById = (id) => new Promise((resolve, reject) => {
   });
 });
 
-module.exports = { allBooks, bookById };
+const booksId = () => new Promise((resolve, reject) => {
+  client.query('SELECT id FROM book', (error, result) => {
+    if (error) {
+      reject(error);
+    }
+    resolve(result.rows);
+  });
+});
+
+const deleteBookById = (id) => new Promise((resolve, reject) => {
+  client.query('DELETE FROM book WHERE id = $1', [id], (error, result) => {
+    if (error) {
+      reject(error);
+    }
+    resolve(result.rows);
+  });
+});
+
+module.exports = {
+  allBooks,
+  bookById,
+  deleteBookById,
+  booksId,
+};

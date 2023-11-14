@@ -2,7 +2,12 @@
 /* eslint-disable no-use-before-define */
 const { nanoid } = require('nanoid');
 const { validateBook } = require('./validation');
-const { allBooks, bookById } = require('./db/queries');
+const {
+  allBooks,
+  bookById,
+  deleteBookById,
+  booksId,
+} = require('./db/queries');
 
 const addBookHandler = (req, h) => {
   const { error } = validateBook(req.payload);
@@ -181,13 +186,15 @@ const editBookByIdHandler = (req, h) => {
   return response;
 };
 
-const deleteBookByIdHandler = (req, h) => {
+const deleteBookByIdHandler = async (req, h) => {
   const { id } = req.params;
 
-  const index = books.findIndex((book) => book.id === id);
+  const books = await booksId();
+  const book = books.map((b) => b.id);
+  const bookIdExist = book.some((bookId) => bookId === id);
 
-  if (index !== -1) {
-    books.splice(index, 1);
+  if (bookIdExist) {
+    await deleteBookById(id);
     const response = h.response({
       status: 'success',
       message: 'Buku berhasil dihapus',
