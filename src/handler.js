@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 const { nanoid } = require('nanoid');
-const books = require('./books');
 const { validateBook } = require('./validation');
+const { allBooks, bookById } = require('./db/queries');
 
 const addBookHandler = (req, h) => {
   const { error } = validateBook(req.payload);
@@ -70,12 +70,11 @@ const addBookHandler = (req, h) => {
   return response;
 };
 
-const getAllBooksHandler = (req, h) => {
-  const { name, reading, finished } = req.query;
-
-  if (name) {
-    const bookByName = books.filter((b) => b.name.toLowerCase().includes(name.toLowerCase()));
-    const book = bookByName.map((b) => ({
+const getAllBooksHandler = async (_, h) => {
+  try {
+    // eslint-disable-next-line no-shadow
+    const books = await allBooks();
+    const book = books.map((b) => ({
       id: b.id,
       name: b.name,
       publisher: b.publisher,
@@ -89,120 +88,38 @@ const getAllBooksHandler = (req, h) => {
     });
     response.code(200);
     return response;
+  } catch (error) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal mendapat seluruh buku',
+    });
+    response.code(400);
+    return response;
   }
-
-  if (reading) {
-    if (reading === '0') {
-      const bookByReading = books.filter((b) => b.reading === false);
-      const book = bookByReading.map((b) => ({
-        id: b.id,
-        name: b.name,
-        publisher: b.publisher,
-      }));
-
-      const response = h.response({
-        status: 'success',
-        data: {
-          books: book,
-        },
-      });
-      response.code(200);
-      return response;
-    }
-
-    if (reading === '1') {
-      const bookByReading = books.filter((b) => b.reading === true);
-      const book = bookByReading.map((b) => ({
-        id: b.id,
-        name: b.name,
-        publisher: b.publisher,
-      }));
-
-      const response = h.response({
-        status: 'success',
-        data: {
-          books: book,
-        },
-      });
-      response.code(200);
-      return response;
-    }
-  }
-
-  if (finished) {
-    if (finished === '0') {
-      const bookByFinished = books.filter((b) => b.finished === false);
-      const book = bookByFinished.map((b) => ({
-        id: b.id,
-        name: b.name,
-        publisher: b.publisher,
-      }));
-
-      const response = h.response({
-        status: 'success',
-        data: {
-          books: book,
-        },
-      });
-      response.code(200);
-      return response;
-    }
-
-    if (finished === '1') {
-      const bookByFinished = books.filter((b) => b.finished === true);
-      const book = bookByFinished.map((b) => ({
-        id: b.id,
-        name: b.name,
-        publisher: b.publisher,
-      }));
-
-      const response = h.response({
-        status: 'success',
-        data: {
-          books: book,
-        },
-      });
-      response.code(200);
-      return response;
-    }
-  }
-
-  const book = books.map((b) => ({
-    id: b.id,
-    name: b.name,
-    publisher: b.publisher,
-  }));
-
-  const response = h.response({
-    status: 'success',
-    data: {
-      books: book,
-    },
-  });
-  response.code(200);
-  return response;
 };
 
-const getBookByIdHandler = (req, h) => {
+const getBookByIdHandler = async (req, h) => {
   const { id } = req.params;
 
-  const book = books.filter((b) => b.id === id)[0];
-
-  if (book !== undefined) {
-    return {
+  try {
+    const book = await bookById(id);
+    const response = h.response({
       status: 'success',
       data: {
         book,
       },
-    };
+    });
+    response.code(200);
+    return response;
+  } catch (error) {
+    console.log(error);
+    const response = h.response({
+      status: 'fail',
+      message: 'Buku tidak ditemukan',
+    });
+    response.code(404);
+    return response;
   }
-
-  const response = h.response({
-    status: 'fail',
-    message: 'Buku tidak ditemukan',
-  });
-  response.code(404);
-  return response;
 };
 
 const editBookByIdHandler = (req, h) => {
