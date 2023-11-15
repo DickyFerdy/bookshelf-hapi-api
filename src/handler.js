@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-use-before-define */
 const { nanoid } = require('nanoid');
 const { validateBook } = require('./validation');
 const {
@@ -79,7 +77,6 @@ const addBookHandler = async (req, h) => {
 
 const getAllBooksHandler = async (_, h) => {
   try {
-    // eslint-disable-next-line no-shadow
     const books = await allBooks();
     const book = books.map((b) => ({
       id: b.id,
@@ -113,12 +110,11 @@ const getBookByIdHandler = async (req, h) => {
   const isSuccess = book.some((bookId) => bookId === id);
 
   if (isSuccess) {
-    // eslint-disable-next-line no-shadow
-    const book = await bookById(id);
+    const bookData = await bookById(id);
     const response = h.response({
       status: 'success',
       data: {
-        book,
+        bookData,
       },
     });
     response.code(200);
