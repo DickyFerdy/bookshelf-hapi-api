@@ -75,9 +75,30 @@ const addBookHandler = async (req, h) => {
   return response;
 };
 
-const getAllBooksHandler = async (_, h) => {
+const getAllBooksHandler = async (req, h) => {
+  const { name } = req.query;
+
+  const books = await allBooks();
+
+  if (name) {
+    const bookByName = books.filter((b) => b.name.toLowerCase().includes(name.toLowerCase()));
+    const book = bookByName.map((b) => ({
+      id: b.id,
+      name: b.name,
+      publisher: b.publisher,
+    }));
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        books: book,
+      },
+    });
+    response.code(200);
+    return response;
+  }
+
   try {
-    const books = await allBooks();
     const book = books.map((b) => ({
       id: b.id,
       name: b.name,
